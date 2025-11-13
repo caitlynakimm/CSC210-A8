@@ -91,5 +91,7 @@ public class AnimalGuess {
         }
     }
 
-
+    private void learnFromMistake() {
+        
+    }
 }
