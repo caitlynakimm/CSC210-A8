@@ -11,9 +11,9 @@ public class AnimalGuess {
 
     private void startGameBase() {
         DecisionTree mouse = new DecisionTree("Mouse");
-        DecisionTree crocodile = new DecisionTree("Crocodile");
-        DecisionTree root = new DecisionTree("Is it a mammal?", mouse, crocodile);
-        this.gameBase = root; //setting start position in the tree to be at the root
+        //DecisionTree crocodile = new DecisionTree("Crocodile");
+        //DecisionTree root = new DecisionTree("Is it a mammal?", mouse, crocodile);
+        this.gameBase = mouse; //setting root/start position in the tree to be at Mouse
     }
 
     private String readUserInput() {
@@ -26,7 +26,7 @@ public class AnimalGuess {
 
     private boolean getYesOrNoAnswer(String prompt) {
         while (true) {
-            System.out.println(prompt + " (yes or no): ");
+            System.out.println(prompt);
             String answer = readUserInput().toLowerCase();
 
             if (answer.equals("yes") || answer.equals("y")) {
@@ -34,7 +34,7 @@ public class AnimalGuess {
             } else if (answer.equals("no") || answer.equals("n")) {
                 return false;
             } else {
-                System.out.println("Please answer yes or no."); //returns to top of loop if nonsensical/misspelled input is given
+                System.out.println("Please answer yes or no."); //returns to top of loop if misspelled/different input is given
             }
         }
     }
@@ -42,28 +42,18 @@ public class AnimalGuess {
     public void playOneGame() {
         System.out.println("Think of an animal.");
         System.out.println("I'll try to guess it.");
-        System.out.println();
 
         DecisionTree currentNode = gameBase;
         DecisionTree parentNode = null;
         boolean lastAnswerWasYes = false;
-        StringBuilder pathBuilder = new StringBuilder();
 
+        //traverse through tree asking questions
         while (currentNode != null && !currentNode.isLeaf()) {
             String question = currentNode.getData();
-
-            String currentPath = pathBuilder.toString(); //saves path through tree as a string
-            if (currentPath.isEmpty()) {
-                System.out.println(question);
-            } else {
-                System.out.println(currentPath + " " + question);
-            }
-
-            boolean response = getYesOrNoAnswer("");
-
-            pathBuilder.append(response ? 'Y' : 'N'); //if boolean returned is true add 'Y' to pathBuilder or else if false add 'N'
+            boolean response = getYesOrNoAnswer(question + " ");
 
             parentNode = currentNode;
+
             if (response) {
                 currentNode = currentNode.getLeft(); //move to parent node's left child
                 lastAnswerWasYes = true;
@@ -76,22 +66,74 @@ public class AnimalGuess {
         // reached a leaf
         if (currentNode != null) {
             String guess = currentNode.getData();
-            String currentPath = pathBuilder.toString();
-
-            System.out.println(currentPath + " " + guess);
-
-            boolean isGuessCorrect = getYesOrNoAnswer("");
+            boolean isGuessCorrect = getYesOrNoAnswer("Is your animal a " + guess + "? ");
 
             if (isGuessCorrect) {
-                System.out.println("Yay I guessed right!");
+                System.out.println("Yay I guessed it!");
             } else {
                 System.out.println("Oh no, I guessed wrong.");
-                //method to learn from wrong guess
+                learnFromWrongGuess(currentNode, parentNode, lastAnswerWasYes);
             }
         }
     }
 
-    private void learnFromMistake() {
-        
+    private void learnFromWrongGuess(DecisionTree wrongNode, DecisionTree parentNode, boolean cameFromYesBranch) {
+        System.out.println("Please help me to learn.");
+        System.out.println("What was your animal?");
+
+        String userAnimal = readUserInput();
+        String wrongGuess = wrongNode.getData();
+
+        System.out.println("Type a yes or no question that would distinguish between a " + userAnimal + " and a " + wrongGuess + ": ");
+
+        String newQuestion = readUserInput();
+
+        boolean answerNewQuestion = getYesOrNoAnswer("Would you answer yes to this question for the " + userAnimal + "?");
+
+        DecisionTree correctAnimalNode = new DecisionTree(userAnimal);
+        DecisionTree oldAnimalNode = new DecisionTree(wrongGuess);
+        DecisionTree newQuestionNode;
+
+        if (answerNewQuestion) {
+            newQuestionNode = new DecisionTree(newQuestion, correctAnimalNode, oldAnimalNode);
+        } else {
+            newQuestionNode = new DecisionTree(newQuestion, oldAnimalNode, correctAnimalNode);
+        }
+
+        if (parentNode == null) {
+            gameBase = newQuestionNode; //newQuestionNode is now new root
+        } else {
+            if (cameFromYesBranch) {
+                parentNode.setLeft(newQuestionNode);
+            } else {
+                parentNode.setRight(newQuestionNode);
+            }
+        }
+
+        System.out.println("Thank you! I will remember this information next time.");
+
     }
+
+    public static void main(String[] args) {
+        AnimalGuess game = new AnimalGuess();
+
+        boolean playAgain = true;
+
+        while (playAgain) {
+            game.playOneGame();
+            playAgain = game.getYesOrNoAnswer("Play again?");
+        }
+
+        System.out.println("Thank you for playing!");
+        game.scanner.close();
+    }
+
+    //should new question node be the new root? the first question node added always appears as the root
+
+            // if (currentPath.isEmpty()) {
+            //     System.out.println(question);
+            // } else {
+            //     System.out.println(currentPath + " " + question);
+            // }
+            // pathBuilder.append(response ? 'Y' : 'N'); //if boolean returned is true add 'Y' to pathBuilder or else if false add 'N'
 }

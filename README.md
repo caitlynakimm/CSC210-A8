@@ -4,15 +4,15 @@ Your readme should include the following information. Each student needs to subm
 
 ## General Information
 Programming Partner Name (if you'd like to be graded together):
-- 
+- n/a
 
 Other Collaborators (and kudos to helpful members of the class):
-- 
+- n/a
 
 Any references used besides JavaDoc and course materials:
-- 
+- https://stackoverflow.com/questions/5725892/how-to-capitalize-the-first-letter-of-word-in-a-string-using-java
 
 ## Assignment Reflection
 
 Please reflect on your experience with this assignment. What was most challenging? What was most interesting?
-- 
+- The most challenging part of this assignment was inserting new nodes in my decision tree.
