@@ -128,12 +128,4 @@ public class AnimalGuess {
         game.scanner.close();
     }
 
-    //should new question node be the new root? the first question node added always appears as the root
-
-            // if (currentPath.isEmpty()) {
-            //     System.out.println(question);
-            // } else {
-            //     System.out.println(currentPath + " " + question);
-            // }
-            // pathBuilder.append(response ? 'Y' : 'N'); //if boolean returned is true add 'Y' to pathBuilder or else if false add 'N'
 }

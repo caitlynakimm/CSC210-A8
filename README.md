@@ -11,6 +11,7 @@ Other Collaborators (and kudos to helpful members of the class):
 
 Any references used besides JavaDoc and course materials:
 - https://stackoverflow.com/questions/5725892/how-to-capitalize-the-first-letter-of-word-in-a-string-using-java
+- https://www.w3schools.com/java/java_bufferedreader.asp
 
 ## Assignment Reflection
 
