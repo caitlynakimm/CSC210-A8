@@ -1,21 +1,65 @@
+import java.io.*;
 import java.util.Scanner;
 
+/**
+ * Animal guessing game that uses a decision tree to guess animals
+ * Learns from user input and saves knowledge between sessions
+ */
 public class AnimalGuess {
     private DecisionTree gameBase;
     private Scanner scanner;
+    private String filename;
 
-    public AnimalGuess() {
+    /**
+     * Creates game with specified knowledge file
+     * @param filename the file to load/save decision tree
+     */
+    public AnimalGuess(String filename) {
         this.scanner = new Scanner(System.in);
-        startGameBase();
+        this.filename = filename;
+        loadGameBase();
     }
 
-    private void startGameBase() {
+    /*
+     * Loads decision tree from file or creates default tree if file doesn't exist
+     */
+    private void loadGameBase() {
+        try { //load file
+            System.out.println("Loading decision tree from: " + filename);
+            this.gameBase = DecisionTree.readFile(filename);
+            System.out.println("Tree loaded successfully.");
+            System.out.println();
+        } catch (IOException e) { //file doesn't exist or issue in reading
+            System.out.println("Couldn't load tree from file. Using default tree.");
+            startDefaultGameBase();
+            System.out.println();
+        }
+    }
+
+    /**
+     * Initializes game with a simple default tree
+     */
+    private void startDefaultGameBase() {
         DecisionTree mouse = new DecisionTree("Mouse");
-        //DecisionTree crocodile = new DecisionTree("Crocodile");
-        //DecisionTree root = new DecisionTree("Is it a mammal?", mouse, crocodile);
-        this.gameBase = mouse; //setting root/start position in the tree to be at Mouse
+        this.gameBase = mouse; //setting root in the tree to be Mouse
+    }
+    
+    /**
+     * Saves current decision tree to file
+     */
+    private void saveGameBase() {
+        try {
+            gameBase.writeToFile(filename);
+            System.out.println("Game knowledge saved to: " + filename);
+        } catch (IOException e) {
+            System.out.println("Error in saving knowledge to file: " + e.getMessage());
+        }
     }
 
+    /**
+     * Reads line of user input and catches errors
+     * @return trimmed user input
+     */
     private String readUserInput() {
         try {
             return scanner.nextLine().trim();
@@ -24,21 +68,31 @@ public class AnimalGuess {
         }
     }
 
+    /**
+     * Asks user for yes/no answer and checks if input is valid
+     * @param prompt question to ask user
+     * @return true for yes or false for no
+     */
     private boolean getYesOrNoAnswer(String prompt) {
         while (true) {
             System.out.println(prompt);
             String answer = readUserInput().toLowerCase();
+
+            System.out.println("received answer: " + answer);
 
             if (answer.equals("yes") || answer.equals("y")) {
                 return true;
             } else if (answer.equals("no") || answer.equals("n")) {
                 return false;
             } else {
-                System.out.println("Please answer yes or no."); //returns to top of loop if misspelled/different input is given
+                System.out.println("Please answer 'yes' or 'no'."); //returns to top of loop if misspelled/different input is given
             }
         }
     }
 
+    /**
+     * Plays one complete round of animal guessing game
+     */
     public void playOneGame() {
         System.out.println("Think of an animal.");
         System.out.println("I'll try to guess it.");
@@ -77,6 +131,12 @@ public class AnimalGuess {
         }
     }
 
+    /**
+     * Learns from wrong guess by adding new question to tree
+     * @param wrongNode node containing wrong guess
+     * @param parentNode parent of wrong node
+     * @param cameFromYesBranch whether wrongNode was left child
+     */
     private void learnFromWrongGuess(DecisionTree wrongNode, DecisionTree parentNode, boolean cameFromYesBranch) {
         System.out.println("Please help me to learn.");
         System.out.println("What was your animal?");
@@ -114,8 +174,14 @@ public class AnimalGuess {
 
     }
 
+    /**
+     * Main method to run animal guessing game
+     * @param args command line arguments (optional filename)
+     */
     public static void main(String[] args) {
-        AnimalGuess game = new AnimalGuess();
+        //using command line argument if given, else use default filename (AnimalTree.txt)
+        String filename = (args.length > 0) ? args[0] : "AnimalTree.txt";
+        AnimalGuess game = new AnimalGuess(filename);
 
         boolean playAgain = true;
 
@@ -125,6 +191,7 @@ public class AnimalGuess {
         }
 
         System.out.println("Thank you for playing!");
+        game.saveGameBase();
         game.scanner.close();
     }
 

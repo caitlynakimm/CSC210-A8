@@ -1,39 +1,67 @@
-import java.io.BufferedReader;
-import java.io.FileReader;
-import java.io.FileWriter;
-import java.io.IOException;
-import java.io.PrintWriter;
+import java.io.*;
 import java.util.HashMap;
 import java.util.LinkedList;
 import java.util.Map;
 import java.util.Queue;
 
+/**
+ * A binary decision tree for animal guessing game
+ * Extends BinaryTree to store questions and animal names
+ * Allows for tree traversal, navigation via node paths, and file I/O
+ */
 public class DecisionTree extends BinaryTree<String> {
     
+    /**
+     * Creates a leaf node with given data
+     * @param data animal name or question for this node
+     */
     public DecisionTree(String data) {
         super(data);
     }
 
+    /**
+     * Creates branch node with left and right children
+     * @param data question for this node
+     * @param left left child of node
+     * @param right right child of node
+     */
     public DecisionTree(String data, BinaryTree<String> left, BinaryTree<String> right) {
         super(data);
         this.setLeft(left); //checks that left is type DecisionTree
         this.setRight(right); //checks that right is type DecisionTree
     }
 
+    /**
+     * Copy constructor makes deep copy of tree
+     * @param tree tree to copy
+     */
     public DecisionTree(DecisionTree tree) {
         super(tree.getData());
         this.setLeft(tree.getLeft());
         this.setRight(tree.getRight());
     }
 
+    /**
+     * Gets left child as a DecisionTree
+     * @return left child node
+     */
     public DecisionTree getLeft() {
         return (DecisionTree)super.getLeft();
     }
 
+    /**
+     * Gets right child as a DecisionTree
+     * @return right child node
+     */
     public DecisionTree getRight() {
         return (DecisionTree)super.getRight();
     }
 
+    /**
+     * Sets left child and checks type
+     * @param left node to set as left child
+     * @throws UnsupportedOperationException if left isn't DecisionTree type
+     */
     public void setLeft(BinaryTree<String> left) {
         if (left == null || left instanceof DecisionTree) {
             super.setLeft(left);
@@ -42,6 +70,11 @@ public class DecisionTree extends BinaryTree<String> {
         }
     }
 
+    /**
+     * Sets right child and checks type
+     * @param right node to set as right child
+     * @throws UnsupportedOperationException if right isn't DecisionTree type
+     */
     public void setRight(BinaryTree<String> right) {
         if (right == null || right instanceof DecisionTree) {
             super.setRight(right);
@@ -50,6 +83,12 @@ public class DecisionTree extends BinaryTree<String> {
         }
     }
 
+    /**
+     * Navigates through tree following path consisting of Y/N directions
+     * @param path string of 'Y' (yes/left) and 'N' (no/right) characters
+     * @return node at end of path
+     * @throws IllegalArgumentException for invalid paths
+     */
     public DecisionTree followPath(String path) {
         DecisionTree current = this;
 
@@ -72,6 +111,12 @@ public class DecisionTree extends BinaryTree<String> {
         return current;
     }
 
+    /**
+     * Writes decision tree to a file in breadth-first order
+     * Each line has a path and node data separated by a space
+     * @param filename file to write to
+     * @throws IOException if file writing fails
+     */
     public void writeToFile(String filename) throws IOException{
         PrintWriter out = new PrintWriter(new FileWriter(filename));
 
@@ -105,6 +150,12 @@ public class DecisionTree extends BinaryTree<String> {
         out.close();
     }
 
+    /**
+     * Reads a decision tree from a file and reconstructs tree structure
+     * @param filename file to read from
+     * @return root node of reconstructed tree
+     * @throws IOException if file reading fails or format is invalid
+     */
     public static DecisionTree readFile(String filename) throws IOException{
         BufferedReader reader = new BufferedReader(new FileReader(filename));
         Map<String, DecisionTree> nodeMap = new HashMap<>();
@@ -112,17 +163,27 @@ public class DecisionTree extends BinaryTree<String> {
         String line;
 
         while((line = reader.readLine()) != null) {
-            line = line.trim(); //removes any leading and trailing space from string
             if (line.isEmpty()) continue;
 
-            int firstSpace = line.indexOf(' ');
-            if (firstSpace == -1) {
-                reader.close();
-                throw new IOException("Invalid file format: " + line);
-            }
+            String path;
+            String nodeData;
 
-            String path = line.substring(0, firstSpace);
-            String nodeData = line.substring(firstSpace + 1).trim();
+            if (line.startsWith(" ")) {
+                path = ""; //root has empty path
+                nodeData = line.substring(1).trim(); //remove any leading space from string
+            } else {
+                int firstSpace = line.indexOf(' ');
+
+                if (firstSpace == -1) {
+                    reader.close();
+                    throw new IOException("Invalid file format: " + line);
+                }
+
+                path = line.substring(0, firstSpace);
+                nodeData = line.substring(firstSpace + 1).trim();
+
+            }
+    
 
             DecisionTree newNode = new DecisionTree(nodeData);
             nodeMap.put(path, newNode);
@@ -155,6 +216,10 @@ public class DecisionTree extends BinaryTree<String> {
         return nodeMap.get(""); //return root
     } 
 
+    /**
+     * Main method that tests DecisionTree operations and file I/O
+     * @param args command line arguments
+     */
     public static void main(String[] args) {
         //sample decision tree with six nodes
         DecisionTree dog = new DecisionTree("Dog");
@@ -169,6 +234,7 @@ public class DecisionTree extends BinaryTree<String> {
         System.out.println();
 
         //traversing and accessing individual nodes' data
+        System.out.println("Accessing nodes from tree:");
         System.out.println(root.getData());
         System.out.println(root.getLeft().getData());
         System.out.println(root.getRight().getData());
@@ -177,11 +243,14 @@ public class DecisionTree extends BinaryTree<String> {
         System.out.println();
 
         //testing followPath() on sample decision tree
-        System.out.println("Data from path 'YY': " + root.followPath("YY").getData()); //telling the directions or path you want to take through the tree from the root
-        System.out.println("Data from path 'YN': " + root.followPath("YN").getData());
-        System.out.println("Data from path 'NY': " + root.followPath("NY").getData());
+        System.out.println("Testing followPath() on tree:");
+        System.out.println("Path 'Y': " + root.followPath("Y").getData());
+        System.out.println("Path 'N': " + root.followPath("N").getData());
+        System.out.println("Path 'YY': " + root.followPath("YY").getData()); //telling the directions or path you want to take through the tree from the root
+        System.out.println("Path 'YN': " + root.followPath("YN").getData());
+        System.out.println("Path 'NY': " + root.followPath("NY").getData());
         
-        //System.out.println();
+        System.out.println();
 
         //Test cases that throw exceptions
         //System.out.println("Data from path 'NN': " + root.followPath("NN").getData());
@@ -192,12 +261,41 @@ public class DecisionTree extends BinaryTree<String> {
         String testFileName = "AnimalTree.txt";
 
         try {
+            //write tree via the root to file
+            System.out.println("Writing tree to file...");
             root.writeToFile(testFileName);
+            System.out.println("Write was successful.");
+            System.out.println();
 
+            //read tree back from file
+            System.out.println("Reading tree from file...");
             DecisionTree loadedTree = DecisionTree.readFile(testFileName);
+            System.out.println("Read was successful.");
+            System.out.println();
 
-            
-        }        
+            //check if loaded tree's main structure is the same
+            System.out.println("Loaded tree verification:");
+            System.out.println("Root: " + loadedTree.getData());
+            System.out.println("Left parent: " + loadedTree.getLeft().getData());
+            System.out.println("Right parent: " + loadedTree.getRight().getData());
+            System.out.println("Left parent's left child: " + loadedTree.getLeft().getLeft().getData());
+            System.out.println("Left parent's right child: " + loadedTree.getLeft().getRight().getData());
+            System.out.println("Right parent's left child: " + loadedTree.getRight().getLeft().getData());
+            System.out.println();
 
+            //test followPath() on loaded tree
+            System.out.println("Testing followPath() on loaded tree:");
+            System.out.println("Path 'Y': " + loadedTree.followPath("Y").getData());
+            System.out.println("Path 'N': " + loadedTree.followPath("N").getData());
+            System.out.println("Path 'YY': " + loadedTree.followPath("YY").getData());
+            System.out.println("Path 'YN': " + loadedTree.followPath("YN").getData());
+            System.out.println("Path 'NY': " + loadedTree.followPath("NY").getData());
+            System.out.println();
+
+            System.out.println("File I/O test successfully completed!");
+        } catch (Exception e) {
+            System.out.println();
+            System.out.println("Error in file I/O test: " + e.getMessage());
+        }
     }
 }

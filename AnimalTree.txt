@@ -1,13 +1,9 @@
- Is it a mammal?
-Y Does it have hooves?
-N Is it a reptile?
-YY Does it give milk?
-YN Is it a carnivore?
-NY Crocodile
-NN Mosquito
-YYY Cow
-YYN Horse
-YNY Is it in the dog family?
-YNN Mouse
-YNYY Dog
-YNYN Cat
+ Is it a family pet?
+Y Dog
+N Is it a farm animal?
+NY Donkey
+NN Does it collect acorns?
+NNY Squirrel
+NNN Does it live by the ocean?
+NNNY Seagull
+NNNN Mouse
